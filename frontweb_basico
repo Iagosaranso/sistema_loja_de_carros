@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoStore - Veículos</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+        }
+
+        /* HEADER */
+        header {
+            background: #1e293b;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* CONTAINER */
+        .container {
+            padding: 20px;
+        }
+
+        /* FORM */
+        .form {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            border: none;
+            width: 160px;
+        }
+
+        /* BOTÕES */
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save {
+            background: #22c55e;
+            color: black;
+        }
+
+        .refresh {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+        }
+
+        /* CARD */
+        .card {
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* IMAGEM */
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        /* INFO */
+        .info {
+            padding: 15px;
+        }
+
+        .price {
+            color: #22c55e;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* DELETE */
+        .delete {
+            background: #ef4444;
+            color: white;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+    🚗 AutoStore - Catálogo de Veículos
+</header>
+
+<div class="container">
+
+    <div class="form">
+        <h3>Cadastrar Veículo</h3>
+
+        <input id="modelo" placeholder="Modelo">
+        <input id="marca" placeholder="Marca">
+        <input id="ano" placeholder="Ano">
+        <input id="cor" placeholder="Cor">
+        <input id="preco" placeholder="Preço">
+        <input id="km" placeholder="Quilometragem">
+
+        <br><br>
+
+        <button class="save" onclick="salvar()">Salvar</button>
+        <button class="refresh" onclick="listar()">Atualizar</button>
+    </div>
+
+    <div class="grid" id="lista"></div>
+
+</div>
+
+<script>
+
+    const API = "http://localhost:8080/veiculos";
+
+    /* SALVAR */
+    function salvar() {
+        fetch(API, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+                modelo: modelo.value,
+                marca: marca.value,
+                ano: ano.value,
+                cor: cor.value,
+                preco: preco.value,
+                quilometragem: km.value
+            })
+        }).then(() => {
+            alert("Salvo!");
+            listar();
+        });
+    }
+
+    /* LISTAR */
+    function listar() {
+        fetch(API)
+            .then(res => res.json())
+            .then(data => {
+
+                let html = "";
+
+                data.forEach(v => {
+
+                    html += `
+            <div class="card">
+                <img src="https://source.unsplash.com/400x300/?car,${v.marca}">
+
+                <div class="info">
+                    <h3>${v.modelo}</h3>
+                    <p>${v.marca}</p>
+                    <p>Ano: ${v.ano}</p>
+                    <p class="price">R$ ${v.preco}</p>
+
+                    <button class="delete" onclick="remover(${v.id})">
+                        Remover
+                    </button>
+                </div>
+            </div>
+            `;
+                });
+
+                lista.innerHTML = html;
+            });
+    }
+
+    /* REMOVER */
+    function remover(id) {
+        fetch(API + "/" + id, {
+            method: "DELETE"
+        }).then(() => listar());
+    }
+
+    listar();
+
+</script>
+
+</body>
+</html>
